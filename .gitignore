@@ -1,0 +1,5 @@
+data/app.db
+data/settings.json
+data/keys/
+*.log
+.DS_Store

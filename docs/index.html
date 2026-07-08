@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火山AI生图 - API文档</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#0f0f0f; color:#e0e0e0; line-height:1.7; }
+.header { background:linear-gradient(135deg,#1a1a2e,#16213e); padding:40px 20px; text-align:center; }
+.header h1 { font-size:2em; background:linear-gradient(135deg,#f59e0b,#ef4444); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.header p { color:#888; margin-top:8px; }
+.container { max-width:900px; margin:0 auto; padding:40px 20px; }
+.section { background:#1a1a2e; border:1px solid #2a2a4e; border-radius:12px; padding:28px; margin-bottom:24px; }
+.section h2 { color:#f59e0b; margin-bottom:16px; font-size:1.3em; }
+.section h3 { color:#fbbf24; margin:16px 0 8px; }
+.section p { color:#aaa; margin:8px 0; }
+.section code { background:#0a0a1a; padding:2px 6px; border-radius:4px; color:#67e8f9; font-size:0.9em; }
+pre { background:#0a0a1a; padding:16px; border-radius:8px; overflow-x:auto; margin:12px 0; }
+pre code { background:none; padding:0; display:block; color:#67e8f9; font-size:0.85em; line-height:1.5; }
+table { width:100%; border-collapse:collapse; margin:12px 0; }
+th, td { padding:10px 14px; text-align:left; border-bottom:1px solid #2a2a4e; }
+th { color:#f59e0b; font-weight:600; }
+td { color:#aaa; font-size:0.9em; }
+td code { font-size:0.9em; }
+.badge { display:inline-block; padding:2px 10px; border-radius:4px; font-size:0.75em; font-weight:600; }
+.badge-get { background:#2563eb; color:#fff; }
+.badge-post { background:#7c3aed; color:#fff; }
+.badge-required { color:#f87171; }
+.badge-optional { color:#888; }
+.footer { text-align:center; padding:30px; color:#666; font-size:0.85em; }
+.footer a { color:#f59e0b; text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>📖 火山AI生图 API 文档</h1>
+    <p>基于火山引擎豆包大模型的图片生成接口</p>
+</div>
+
+<div class="container">
+    <!-- 基础信息 -->
+    <div class="section">
+        <h2>🔗 基础信息</h2>
+        <table>
+            <tr><th>Base URL</th><td><code>http://www.volcengine.com:8080</code></td></tr>
+            <tr><th>格式</th><td>JSON (UTF-8)</td></tr>
+            <tr><th>认证</th><td>URL 参数 <code>key</code>（API密钥）</td></tr>
+        </table>
+    </div>
+
+    <!-- 生图接口 -->
+    <div class="section">
+        <h2>🎨 图片生成 <span class="badge badge-get">GET</span></h2>
+        <p>根据文字描述生成图片，支持文生图和图生图</p>
+
+        <h3>请求 URL</h3>
+        <pre><code>GET /api/generate.php?key={密钥}&prompt={描述}&size={尺寸}&n={张数}</code></pre>
+
+        <h3>参数</h3>
+        <table>
+            <tr><th>参数</th><th>必填</th><th>说明</th></tr>
+            <tr><td><code>key</code></td><td class="badge-required">必填</td><td>API密钥（测试密钥：<code>TEST1-ABCD-EFGH-IJKL-MNOP</code>）</td></tr>
+            <tr><td><code>prompt</code></td><td class="badge-required">必填</td><td>图片描述文字，如"一只在草地上奔跑的边牧，写实风格"</td></tr>
+            <tr><td><code>size</code></td><td class="badge-optional">可选</td><td>尺寸，默认 <code>1024x1024</code>，可选：<code>512x512</code>、<code>768x768</code>、<code>1024x768</code>、<code>768x1024</code></td></tr>
+            <tr><td><code>n</code></td><td class="badge-optional">可选</td><td>生成张数，1-4，默认 1</td></tr>
+        </table>
+
+        <h3>请求示例</h3>
+        <pre><code>curl "http://www.volcengine.com:8080/api/generate.php?key=TEST1-ABCD-EFGH-IJKL-MNOP&prompt=赛博朋克城市夜景，霓虹灯，雨夜&size=1024x1024"</code></pre>
+
+        <h3>响应示例</h3>
+        <pre><code>{
+  "code": 200,
+  "msg": "生成成功",
+  "data": {
+    "images": [
+      {
+        "url": "https://...generated.png",
+        "revised_prompt": "..." 
+      }
+    ],
+    "prompt": "赛博朋克城市夜景，霓虹灯，雨夜",
+    "size": "1024x1024",
+    "n": 1,
+    "model": "doubao-vision-pro-32k",
+    "key_info": {
+      "is_test": true,
+      "type": "count",
+      "remaining": null,
+      "daily_remaining": 9,
+      "expires_at": null
+    }
+  }
+}</code></pre>
+    </div>
+
+    <!-- 密钥查询 -->
+    <div class="section">
+        <h2>🔑 密钥查询 <span class="badge badge-get">GET</span></h2>
+        <p>查询任意密钥的状态、剩余次数和到期时间，不消耗次数</p>
+
+        <h3>请求 URL</h3>
+        <pre><code>GET /api/key_info.php?key={密钥}</code></pre>
+
+        <h3>响应</h3>
+        <pre><code>{
+  "code": 200,
+  "msg": "ok",
+  "data": {
+    "is_test": true,
+    "type": "count",
+    "is_active": true,
+    "remaining": 8,
+    "daily_remaining": 9,
+    "expires_at": null
+  }
+}</code></pre>
+    </div>
+
+    <!-- 代码示例 -->
+    <div class="section">
+        <h2>💻 各语言调用示例</h2>
+
+        <h3>Python</h3>
+        <pre><code>import requests
+
+url = "http://www.volcengine.com:8080/api/generate.php"
+params = {
+    "key": "你的密钥",
+    "prompt": "一只在星空下奔跑的白色边牧",
+    "size": "1024x1024",
+    "n": 1
+}
+resp = requests.get(url, params=params).json()
+if resp["code"] == 200:
+    image_url = resp["data"]["images"][0]["url"]
+    print(f"生成成功: {image_url}")
+else:
+    print(f"失败: {resp['msg']}")</code></pre>
+
+        <h3>JavaScript / Node.js</h3>
+        <pre><code>const url = new URL("http://www.volcengine.com:8080/api/generate.php");
+url.searchParams.set("key", "你的密钥");
+url.searchParams.set("prompt", "水墨风格的山景，云雾缭绕");
+url.searchParams.set("size", "1024x1024");
+
+fetch(url)
+  .then(r => r.json())
+  .then(data => {
+    if (data.code === 200) {
+      console.log("图片URL:", data.data.images[0].url);
+    }
+  });</code></pre>
+
+        <h3>PHP</h3>
+        <pre><code>&lt;?php
+$url = "http://www.volcengine.com:8080/api/generate.php?" . http_build_query([
+    'key' => '你的密钥',
+    'prompt' => '卡通风格的森林小屋',
+    'size' => '1024x1024',
+]);
+$resp = json_decode(file_get_contents($url), true);
+if ($resp['code'] === 200) {
+    echo "图片: " . $resp['data']['images'][0]['url'];
+}</code></pre>
+    </div>
+
+    <!-- 错误码 -->
+    <div class="section">
+        <h2>⚠️ 错误码说明</h2>
+        <table>
+            <tr><th>HTTP</th><th>说明</th></tr>
+            <tr><td>400</td><td>缺少必填参数（key / prompt）</td></tr>
+            <tr><td>403</td><td>密钥无效、已过期、已被禁用</td></tr>
+            <tr><td>429</td><td>测试密钥每日每IP 10次已用完</td></tr>
+            <tr><td>500</td><td>火山引擎API调用失败或服务端配置错误</td></tr>
+        </table>
+    </div>
+</div>
+
+<div class="footer">
+    <p><a href="/">🏠 返回首页</a> &nbsp;|&nbsp; <a href="/pay/">💳 购买套餐</a></p>
+</div>
+</body>
+</html>
